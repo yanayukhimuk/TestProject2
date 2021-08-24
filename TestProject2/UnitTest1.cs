@@ -2,23 +2,22 @@ using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using System;
-using System.Collections.Generic;
 
 namespace TestProject2
 {
     public class MainTest
     {
-        public class BrowserSettings
+        public class Browser_Settings
         {
             IWebDriver driver;
-            public void InitBrowser()
+            public void Init_Browser()
             {
                 driver = new ChromeDriver();
                 driver.Manage().Window.Maximize();
             }
-            public string Title
+            public void Goto(string url)
             {
-                get { return driver.Title; }
+                driver.Url = url;
             }
             public void Close()
             {
@@ -32,38 +31,49 @@ namespace TestProject2
 
         class WebSiteTest
         {
-            BrowserSettings brow = new BrowserSettings();
-            IWebDriver webDriver = new ChromeDriver();
+            Browser_Settings brow = new Browser_Settings();
+            IWebDriver webDriver;
+            string chrome_url = "https://www.google.com/";
+            string brw_url = "https://www.rw.by/";
 
             [SetUp]
             public void StartBrowser()
             {
-                brow.InitBrowser();
+                brow.Init_Browser();
             }
 
             [Test]
             public void Test1()
             {
-                webDriver.Navigate().GoToUrl("https://www.google.com/");
+                brow.Goto(chrome_url);
+                System.Threading.Thread.Sleep(2000);
+
+                webDriver = brow.getDriver;
 
                 IWebElement SearchInput = webDriver.FindElement(By.Name("q"));
 
                 SearchInput.SendKeys("белорусская железная дорога");
                 SearchInput.Submit();
- 
+
                 IWebElement SearchResult = webDriver.FindElement(By.CssSelector("a[href=\"https://www.rw.by/\"]"));
-                SearchResult.Click(); 
+                SearchResult.Click();
 
                 var CheckSite = webDriver.FindElement(By.Id("tickets_form")); //возможна проверка страницы через JS
                 Assert.That(CheckSite.Displayed, Is.True);
             }
 
+            [Test]
             public void Test2()
             {
+                brow.Goto(brw_url);
+                System.Threading.Thread.Sleep(2000);
+
+                webDriver = brow.getDriver;
+
                 var LanguageSwitcher = webDriver.FindElement(By.LinkText("ENG"));
                 LanguageSwitcher.Click();
 
-                var NewsItems = webDriver.FindElements(By.CssSelector(".index-news-list dt")); 
+                var NewsItems = webDriver.FindElements(By.CssSelector(".index-news-list dt"));
                 Assert.GreaterOrEqual(NewsItems.Count, 4);
 
                 Assert.DoesNotThrow(() => webDriver.FindElement(By.CssSelector(".footer-extra .copyright")));
@@ -74,8 +84,14 @@ namespace TestProject2
                 LanguageSwitcher.Click();
             }
 
+            [Test]
             public void Test3()
             {
+                brow.Goto(brw_url);
+                System.Threading.Thread.Sleep(2000);
+
+                webDriver = brow.getDriver;
+
                 IWebElement SearchInputTwo = webDriver.FindElement(By.Name("q"));
                 var symbs = GenerateSymb();
                 SearchInputTwo.SendKeys(symbs);
@@ -92,13 +108,16 @@ namespace TestProject2
 
                 Assert.GreaterOrEqual(webDriver.FindElements(By.CssSelector(".search-result .name")).Count, 15);
 
-                Console.WriteLine(webDriver.FindElements(By.CssSelector(".search-result .name")).ToString()); //Console.Writeline
+                Console.WriteLine(webDriver.FindElements(By.CssSelector(".search-result .name"))); //дважды ищу 
             }
 
+            [Test]
             public void Test4()
-            { 
-                IWebElement SiteLogo = webDriver.FindElement(By.CssSelector(".top-tools .top-logo"));
-                SiteLogo.Click();
+            {
+                brow.Goto(brw_url);
+                System.Threading.Thread.Sleep(2000);
+
+                webDriver = brow.getDriver;
 
                 IWebElement WhereFrom = webDriver.FindElement(By.Name("from"));
                 IWebElement WhereTo = webDriver.FindElement(By.Name("to"));
@@ -132,20 +151,21 @@ namespace TestProject2
                 var ToFind = webDriver.FindElement(By.XPath("//*[@id='fTickets']/div[2]/div[1]/span/input"));
                 ToFind.Click();
 
-                IWebElement FirstTrain = webDriver.FindElement((By.XPath("//*[@id='sch - route']/div[3]/div[2]/div[1]/div[3]/div/div[1]/div/div[1]")));
+                IWebElement FirstTrain = webDriver.FindElement(By.CssSelector(".sch-table__cell cell-1 .sch-table__route .train-route"));
                 FirstTrain.Click();
 
-                var TrainDisplayed = webDriver.FindElement(By.XPath("//*[@id='workarea']/div[2]/div[1]/div/div[2]"));
+                IWebElement TrainDisplayed = webDriver.FindElement(By.CssSelector(".row .col-lg-9 col-md-8 col-xs-12 .sch-title__title h2"));
                 Assert.That(TrainDisplayed.Displayed, Is.True);
 
-                var DaysOfTravel = webDriver.FindElement(By.XPath("//*[@id='workarea']/div[2]/div[1]/div/div[3]")); // XPath вручную (как привязываться к элементам) 
+                var DaysOfTravel = webDriver.FindElement(By.CssSelector(".sch-title__descr")); // XPath вручную (как привязываться к элементам) 
                 Assert.That(DaysOfTravel.Displayed, Is.True);
 
-                IWebElement SiteLogo2 = webDriver.FindElement(By.CssSelector(".header-bottom .logo-png"));
+                IWebElement SiteLogo = webDriver.FindElement(By.CssSelector(".header-bottom .logo-png"));
                 SiteLogo.Click();
 
                 var CheckSite2 = webDriver.FindElement(By.Id("tickets_form"));
                 Assert.That(CheckSite2.Displayed, Is.True);
+
 
             }
 
