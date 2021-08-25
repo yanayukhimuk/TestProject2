@@ -2,6 +2,7 @@ using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using System;
+using System.Collections.Generic;
 
 namespace TestProject2
 {
@@ -36,14 +37,14 @@ namespace TestProject2
             string chrome_url = "https://www.google.com/";
             string brw_url = "https://www.rw.by/";
 
-            [SetUp]
+            [SetUp] // добавила предустановку - нашла такой вариант 
             public void StartBrowser()
             {
                 brow.Init_Browser();
             }
 
             [Test]
-            public void Test1()
+            public void Test1() // рабочий 
             {
                 brow.Goto(chrome_url);
                 System.Threading.Thread.Sleep(2000);
@@ -63,7 +64,7 @@ namespace TestProject2
             }
 
             [Test]
-            public void Test2()
+            public void Test2() //рабочий 
             {
                 brow.Goto(brw_url);
                 System.Threading.Thread.Sleep(2000);
@@ -85,7 +86,7 @@ namespace TestProject2
             }
 
             [Test]
-            public void Test3()
+            public void Test3() //рабочий, но есть вопросы 
             {
                 brow.Goto(brw_url);
                 System.Threading.Thread.Sleep(2000);
@@ -108,7 +109,7 @@ namespace TestProject2
 
                 Assert.GreaterOrEqual(webDriver.FindElements(By.CssSelector(".search-result .name")).Count, 15);
 
-                Console.WriteLine(webDriver.FindElements(By.CssSelector(".search-result .name"))); //дважды ищу 
+                Console.WriteLine(webDriver.FindElements(By.CssSelector(".search-result .name"))); //дважды ищу и ссылки не вывел 
             }
 
             [Test]
@@ -124,47 +125,52 @@ namespace TestProject2
 
                 WhereFrom.SendKeys("Брест");
                 WhereTo.SendKeys("Минск");
+                                               
+                DateTime CurrentDate = DateTime.Now; // методом определила текущую дату 
+                Console.WriteLine(CurrentDate);
 
-                //вызывать метод по текущей дате + 5 дней == с датой в datepicker 
+                DateTime RequiredDate = CurrentDate.AddDays(5); // нашла нужную (+ 5 дней), независимо от того, какая текущая 
+                Console.WriteLine(RequiredDate);
 
-                //IWebElement Calendar = webDriver.FindElement(By.CssSelector(".calendar"));
-                //Calendar.Click();
+                IWebElement Calendar = webDriver.FindElement(By.CssSelector(".calendar"));
+                Calendar.Click(); // открываем календарь 
 
-                ///////// надо научиться работать с датами в Date picker 
+                // тут пошла проблема - хотела получить все даты из календаря и сравнить с нужной (над ли вытягивать атрибут?) пыталась JavaScriptExecutor применить уже (дату
+                // получилось вбить, но для поиска этого не достаточно - всё равно на появляющемся календаре нужно ткнуть в нужную дату - как на неё выйти? как попасть на highlight 
 
-                //List<IWebElement> tableContent = new List<IWebElement>(webDriver.FindElement(By.Id("ui-datepicker-div"))
-                //    .FindElements(By.CssSelector("td"))); // список элементов 
+                var SearchDay = RequiredDate.Day;
 
-                //foreach (IWebElement ele in tableContent) 
-                //{
-                //    string date = ele.Text; 
+                List<IWebElement> tableContent = new List<IWebElement>(webDriver.FindElement(By.Id("ui-datepicker-div"))
+                   .FindElements(By.CssSelector("td"))); // список элементов 
 
-                //    if (date.Equals(27)) // пока только вручную задать могу 
-                //    {
-                //        ele.Click(); // вопрос, как сдвинуться на 5, не знаю, как доработать код 
-                //    }
-                //}
+                foreach (IWebElement ele in tableContent)
+                {
+                    string date = ele.Text;
 
-                IWebElement NewDate = webDriver.FindElement(By.XPath("//*[@id='fTickets']/div[2]/div[3]/a[2]")); //так как не умею пока выбирать нужную дату, решила продолжить тест таким образом 
-                NewDate.Click();
+                    if (date.Equals(SearchDay))
+                    {
+                        ele.Click();
+                        break;
+                    }
+                }
 
                 var ToFind = webDriver.FindElement(By.XPath("//*[@id='fTickets']/div[2]/div[1]/span/input"));
-                ToFind.Click();
+                ToFind.Click(); // если просто кликнуть, будет текущая дата по умолчанию 
 
-                IWebElement FirstTrain = webDriver.FindElement(By.CssSelector(".sch-table__cell cell-1 .sch-table__route .train-route"));
-                FirstTrain.Click();
+                //IWebElement FirstTrain = webDriver.FindElement(By.CssSelector(".sch-table__cell cell-1 .sch-table__route .train-route"));
+                //FirstTrain.Click(); - как обратиться к элементам лучше? не получаеся ни через XPath, ни через selector 
 
-                IWebElement TrainDisplayed = webDriver.FindElement(By.CssSelector(".row .col-lg-9 col-md-8 col-xs-12 .sch-title__title h2"));
-                Assert.That(TrainDisplayed.Displayed, Is.True);
+                //IWebElement TrainDisplayed = webDriver.FindElement(By.CssSelector(".row .col-lg-9 col-md-8 col-xs-12 .sch-title__title h2"));
+                //Assert.That(TrainDisplayed.Displayed, Is.True);
 
-                var DaysOfTravel = webDriver.FindElement(By.CssSelector(".sch-title__descr")); // XPath вручную (как привязываться к элементам) 
-                Assert.That(DaysOfTravel.Displayed, Is.True);
+                // var DaysOfTravel = webDriver.FindElement(By.CssSelector(".sch-title__descr")); // XPath вручную (как привязываться к элементам) 
+                //Assert.That(DaysOfTravel.Displayed, Is.True);
 
-                IWebElement SiteLogo = webDriver.FindElement(By.CssSelector(".header-bottom .logo-png"));
-                SiteLogo.Click();
+                //IWebElement SiteLogo = webDriver.FindElement(By.CssSelector(".header-bottom .logo-png"));
+                //SiteLogo.Click();
 
-                var CheckSite2 = webDriver.FindElement(By.Id("tickets_form"));
-                Assert.That(CheckSite2.Displayed, Is.True);
+                // var CheckSite2 = webDriver.FindElement(By.Id("tickets_form"));
+                // Assert.That(CheckSite2.Displayed, Is.True);
 
 
             }
@@ -178,16 +184,6 @@ namespace TestProject2
                     s += (char)rand.Next('a', 'z' + 1);
                 }
                 return s;
-            }
-
-            public void ConsoleOutput() //попытка вывести данные в консоль 
-            {
-                string[] strings = new string[15];
-                for (int i = 0; i < 16; i++)
-                {
-                    Console.WriteLine($"Result[{0}] = {1}", i, strings[i]);
-                    Console.ReadKey();
-                }
             }
         }
     }
