@@ -2,7 +2,8 @@ using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using System;
-using System.Collections.Generic;
+using System.Linq;
+
 
 namespace TestProject2
 {
@@ -33,7 +34,7 @@ namespace TestProject2
         class WebSiteTest
         {
             Browser_Settings brow = new Browser_Settings();
-            IWebDriver webDriver;
+            IWebDriver webDriver => brow.getDriver;
             string chrome_url = "https://www.google.com/";
             string brw_url = "https://www.rw.by/";
 
@@ -48,8 +49,6 @@ namespace TestProject2
             {
                 brow.Goto(chrome_url);
                 System.Threading.Thread.Sleep(2000);
-
-                webDriver = brow.getDriver;
 
                 IWebElement SearchInput = webDriver.FindElement(By.Name("q"));
 
@@ -69,9 +68,7 @@ namespace TestProject2
                 brow.Goto(brw_url);
                 System.Threading.Thread.Sleep(2000);
 
-                webDriver = brow.getDriver;
-
-                var LanguageSwitcher = webDriver.FindElement(By.LinkText("ENG"));
+                var LanguageSwitcher = webDriver.FindElement(By.LinkText("ENG"));//обработка exception - Assert doesnt throw 
                 LanguageSwitcher.Click();
 
                 var NewsItems = webDriver.FindElements(By.CssSelector(".index-news-list dt"));
@@ -91,8 +88,6 @@ namespace TestProject2
                 brow.Goto(brw_url);
                 System.Threading.Thread.Sleep(2000);
 
-                webDriver = brow.getDriver;
-
                 IWebElement SearchInputTwo = webDriver.FindElement(By.Name("q"));
                 var symbs = GenerateSymb();
                 SearchInputTwo.SendKeys(symbs);
@@ -108,8 +103,11 @@ namespace TestProject2
                 SearchInputThree.Submit();
 
                 Assert.GreaterOrEqual(webDriver.FindElements(By.CssSelector(".search-result .name")).Count, 15);
+                webDriver.FindElements(By.CssSelector(".search-result .name")).Select(el => el.GetAttribute("href")).ToList().ForEach(Console.WriteLine);
 
-                Console.WriteLine(webDriver.FindElements(By.CssSelector(".search-result .name"))); //дважды ищу и ссылки не вывел 
+                //var elements = webDriver.FindElements(By.CssSelector(".search-result .name")); - другой вариант 
+                //foreach(var el in elements)
+                //    Console.WriteLine(el.GetAttribute("href"));
             }
 
             [Test]
@@ -118,44 +116,22 @@ namespace TestProject2
                 brow.Goto(brw_url);
                 System.Threading.Thread.Sleep(2000);
 
-                webDriver = brow.getDriver;
-
                 IWebElement WhereFrom = webDriver.FindElement(By.Name("from"));
                 IWebElement WhereTo = webDriver.FindElement(By.Name("to"));
 
                 WhereFrom.SendKeys("Брест");
                 WhereTo.SendKeys("Минск");
-                                               
-                DateTime CurrentDate = DateTime.Now; // методом определила текущую дату 
-                Console.WriteLine(CurrentDate);
 
-                DateTime RequiredDate = CurrentDate.AddDays(5); // нашла нужную (+ 5 дней), независимо от того, какая текущая 
-                Console.WriteLine(RequiredDate);
+                ////DateTime сurrentDate = DateTime.Now; // методом определила текущую дату 
+                // Console.WriteLine(сurrentDate);
 
-                IWebElement Calendar = webDriver.FindElement(By.CssSelector(".calendar"));
-                Calendar.Click(); // открываем календарь 
+                // DateTime requiredDate = GetRequiredDateElem().AddDays(5); // нашла нужную (+ 5 дней), независимо от того, какая текущая 
+                // //Console.WriteLine(requiredDate);
+                webDriver.FindElement(By.CssSelector(".calendar")).Click();
 
-                // тут пошла проблема - хотела получить все даты из календаря и сравнить с нужной (над ли вытягивать атрибут?) пыталась JavaScriptExecutor применить уже (дату
-                // получилось вбить, но для поиска этого не достаточно - всё равно на появляющемся календаре нужно ткнуть в нужную дату - как на неё выйти? как попасть на highlight 
+                GetRequiredDateElem(DateTime.Now.AddDays(5)).Click();
 
-                var SearchDay = RequiredDate.Day;
-
-                List<IWebElement> tableContent = new List<IWebElement>(webDriver.FindElement(By.Id("ui-datepicker-div"))
-                   .FindElements(By.CssSelector("td"))); // список элементов 
-
-                foreach (IWebElement ele in tableContent)
-                {
-                    string date = ele.Text;
-
-                    if (date.Equals(SearchDay))
-                    {
-                        ele.Click();
-                        break;
-                    }
-                }
-
-                var ToFind = webDriver.FindElement(By.XPath("//*[@id='fTickets']/div[2]/div[1]/span/input"));
-                ToFind.Click(); // если просто кликнуть, будет текущая дата по умолчанию 
+                webDriver.FindElement(By.CssSelector("#fTickets input[type=\"submit\"")).Click();
 
                 //IWebElement FirstTrain = webDriver.FindElement(By.CssSelector(".sch-table__cell cell-1 .sch-table__route .train-route"));
                 //FirstTrain.Click(); - как обратиться к элементам лучше? не получаеся ни через XPath, ни через selector 
@@ -185,6 +161,31 @@ namespace TestProject2
                 }
                 return s;
             }
+
+            IWebElement GetRequiredDateElem(DateTime requiredDate) => webDriver.FindElement(By.Id("ui-datepicker-div"))
+                    .FindElements(By.CssSelector("td"))
+                    .Where(el =>
+                    {
+                        try
+                        {
+                            return el.FindElement(By.ClassName("ui-state-default")).Text == requiredDate.Day.ToString();
+                        }
+                        catch (NoSuchElementException)
+                        {
+                            return false;
+                        }
+                    }).FirstOrDefault(el =>
+            {
+                var contextEl = webDriver.FindElement(By.ClassName("ui-datepicker-today"));
+                var onclickStr = contextEl.GetAttribute("onclick");
+                var commaInd1 = onclickStr.IndexOf(',');
+                var commaInd2 = onclickStr.IndexOf(',', commaInd1 + 1);
+                var commaInd3 = onclickStr.IndexOf(',', commaInd2 + 1);
+                var month = Convert.ToInt32(onclickStr[(commaInd1 + 1)..commaInd2]);
+                var year = Convert.ToInt32(onclickStr[(commaInd2 + 1)..commaInd3]);
+                return requiredDate.Month == month && requiredDate.Year == year;
+            });
+
         }
     }
 }
