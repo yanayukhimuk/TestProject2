@@ -124,11 +124,8 @@ namespace TestProject2
 
                 webDriver.FindElement(By.Id("yDate"))
                     .SendKeys(DateTime.Now.AddDays(5).ToShortDateString());
-
-                webDriver.FindElement(By.Id("yDate")).Submit();
-
-
-                //webDriver.FindElement(By.CssSelector("#fTickets input[type=\"submit\"")).Click();
+                webDriver.FindElement(By.ClassName("ui-state-active")).Click();
+                webDriver.FindElement(By.CssSelector("#fTickets input[type=\"submit\"")).Click();
 
                 //IWebElement FirstTrain = webDriver.FindElement(By.CssSelector(".sch-table__cell cell-1 .sch-table__route .train-route"));
                 //FirstTrain.Click(); - как обратиться к элементам лучше? не получаеся ни через XPath, ни через selector 
