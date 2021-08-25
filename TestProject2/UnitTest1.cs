@@ -122,16 +122,13 @@ namespace TestProject2
                 WhereFrom.SendKeys("Брест");
                 WhereTo.SendKeys("Минск");
 
-                ////DateTime сurrentDate = DateTime.Now; // методом определила текущую дату 
-                // Console.WriteLine(сurrentDate);
+                webDriver.FindElement(By.Id("yDate"))
+                    .SendKeys(DateTime.Now.AddDays(5).ToShortDateString());
 
-                // DateTime requiredDate = GetRequiredDateElem().AddDays(5); // нашла нужную (+ 5 дней), независимо от того, какая текущая 
-                // //Console.WriteLine(requiredDate);
-                webDriver.FindElement(By.CssSelector(".calendar")).Click();
+                webDriver.FindElement(By.Id("yDate")).Submit();
 
-                GetRequiredDateElem(DateTime.Now.AddDays(5)).Click();
 
-                webDriver.FindElement(By.CssSelector("#fTickets input[type=\"submit\"")).Click();
+                //webDriver.FindElement(By.CssSelector("#fTickets input[type=\"submit\"")).Click();
 
                 //IWebElement FirstTrain = webDriver.FindElement(By.CssSelector(".sch-table__cell cell-1 .sch-table__route .train-route"));
                 //FirstTrain.Click(); - как обратиться к элементам лучше? не получаеся ни через XPath, ни через selector 
@@ -162,29 +159,29 @@ namespace TestProject2
                 return s;
             }
 
-            IWebElement GetRequiredDateElem(DateTime requiredDate) => webDriver.FindElement(By.Id("ui-datepicker-div"))
-                    .FindElements(By.CssSelector("td"))
-                    .Where(el =>
-                    {
-                        try
-                        {
-                            return el.FindElement(By.ClassName("ui-state-default")).Text == requiredDate.Day.ToString();
-                        }
-                        catch (NoSuchElementException)
-                        {
-                            return false;
-                        }
-                    }).FirstOrDefault(el =>
-            {
-                var contextEl = webDriver.FindElement(By.ClassName("ui-datepicker-today"));
-                var onclickStr = contextEl.GetAttribute("onclick");
-                var commaInd1 = onclickStr.IndexOf(',');
-                var commaInd2 = onclickStr.IndexOf(',', commaInd1 + 1);
-                var commaInd3 = onclickStr.IndexOf(',', commaInd2 + 1);
-                var month = Convert.ToInt32(onclickStr[(commaInd1 + 1)..commaInd2]);
-                var year = Convert.ToInt32(onclickStr[(commaInd2 + 1)..commaInd3]);
-                return requiredDate.Month == month && requiredDate.Year == year;
-            });
+            //IWebElement GetRequiredDateElem(DateTime requiredDate) => webDriver.FindElement(By.Id("ui-datepicker-div"))
+            //        .FindElements(By.CssSelector("td"))
+            //        .Where(el =>
+            //        {
+            //            try
+            //            {
+            //                return el.FindElement(By.ClassName("ui-state-default")).Text == requiredDate.Day.ToString();
+            //            }
+            //            catch (NoSuchElementException)
+            //            {
+            //                return false;
+            //            }
+            //        }).FirstOrDefault(el =>
+            //{
+            //    var contextEl = webDriver.FindElement(By.ClassName("ui-datepicker-today"));
+            //    var onclickStr = contextEl.GetAttribute("onclick");
+            //    var commaInd1 = onclickStr.IndexOf(',');
+            //    var commaInd2 = onclickStr.IndexOf(',', commaInd1 + 1);
+            //    var commaInd3 = onclickStr.IndexOf(',', commaInd2 + 1);
+            //    var month = Convert.ToInt32(onclickStr[(commaInd1 + 1)..commaInd2]);
+            //    var year = Convert.ToInt32(onclickStr[(commaInd2 + 1)..commaInd3]);
+            //    return requiredDate.Month == month && requiredDate.Year == year;
+            //});
 
         }
     }
