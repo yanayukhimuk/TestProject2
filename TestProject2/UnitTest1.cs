@@ -30,12 +30,12 @@ namespace TestProject2
                 get { return driver; }
             }
         }
-
+        // AAA - именование
         class WebSiteTest
         {
             Browser_Settings brow = new Browser_Settings();
             IWebDriver webDriver => brow.getDriver;
-            string chrome_url = "https://www.google.com/";
+            string chrome_url = "https://www.google.com/"; //выбор из файла
             string brw_url = "https://www.rw.by/";
 
             [SetUp] // добавила предустановку - нашла такой вариант 
@@ -45,10 +45,11 @@ namespace TestProject2
             }
 
             [Test]
-            public void Test1() // рабочий 
+            public void Test1() 
             {
                 brow.Goto(chrome_url);
-                System.Threading.Thread.Sleep(2000);
+                System.Threading.Thread.Sleep(2000); //убрать - 2 типа ожидани€ в Selenium - test 
+                //Page object - только логика
 
                 IWebElement SearchInput = webDriver.FindElement(By.Name("q"));
 
@@ -63,7 +64,7 @@ namespace TestProject2
             }
 
             [Test]
-            public void Test2() //рабочий 
+            public void Test2() 
             {
                 brow.Goto(brw_url);
                 System.Threading.Thread.Sleep(2000);
@@ -83,7 +84,7 @@ namespace TestProject2
             }
 
             [Test]
-            public void Test3() //рабочий, но есть вопросы 
+            public void Test3()  
             {
                 brow.Goto(brw_url);
                 System.Threading.Thread.Sleep(2000);
@@ -105,9 +106,6 @@ namespace TestProject2
                 Assert.GreaterOrEqual(webDriver.FindElements(By.CssSelector(".search-result .name")).Count, 15);
                 webDriver.FindElements(By.CssSelector(".search-result .name")).Select(el => el.GetAttribute("href")).ToList().ForEach(Console.WriteLine);
 
-                //var elements = webDriver.FindElements(By.CssSelector(".search-result .name")); - другой вариант 
-                //foreach(var el in elements)
-                //    Console.WriteLine(el.GetAttribute("href"));
             }
 
             [Test]
@@ -127,25 +125,33 @@ namespace TestProject2
                 webDriver.FindElement(By.ClassName("ui-state-active")).Click();
                 webDriver.FindElement(By.CssSelector("#fTickets input[type=\"submit\"")).Click();
 
-                //IWebElement FirstTrain = webDriver.FindElement(By.CssSelector(".sch-table__cell cell-1 .sch-table__route .train-route"));
-                //FirstTrain.Click(); - как обратитьс€ к элементам лучше? не получаес€ ни через XPath, ни через selector 
+                webDriver.FindElements(By.CssSelector(".sch-table__train-type .sch-table__route")).Select(el => el.Text).ToList().ForEach(Console.WriteLine);
 
-                //IWebElement TrainDisplayed = webDriver.FindElement(By.CssSelector(".row .col-lg-9 col-md-8 col-xs-12 .sch-title__title h2"));
-                //Assert.That(TrainDisplayed.Displayed, Is.True);
+                System.Collections.Generic.List<IWebElement> links = new System.Collections.Generic.List<IWebElement>();
+                foreach (var link in links)
+                {
+                    if (link.Text == "702Ѕ")
+                    {
+                        link.Click();
+                        break;
+                    }
+                }
+                IWebElement TrainDisplayed = webDriver.FindElement(By.CssSelector(".sch-title__title h2"));
+                Assert.That(TrainDisplayed.Displayed, Is.True);
 
-                // var DaysOfTravel = webDriver.FindElement(By.CssSelector(".sch-title__descr")); // XPath вручную (как прив€зыватьс€ к элементам) 
-                //Assert.That(DaysOfTravel.Displayed, Is.True);
+                var DaysOfTravel = webDriver.FindElement(By.CssSelector(".sch-title__descr")); 
+                Assert.That(DaysOfTravel.Displayed, Is.True);
 
-                //IWebElement SiteLogo = webDriver.FindElement(By.CssSelector(".header-bottom .logo-png"));
-                //SiteLogo.Click();
+                IWebElement SiteLogo = webDriver.FindElement(By.CssSelector(".header-bottom .logo-png"));
+                SiteLogo.Click();
 
-                // var CheckSite2 = webDriver.FindElement(By.Id("tickets_form"));
-                // Assert.That(CheckSite2.Displayed, Is.True);
+                var CheckSite2 = webDriver.FindElement(By.Id("tickets_form"));
+                Assert.That(CheckSite2.Displayed, Is.True);
 
 
             }
 
-            static string GenerateSymb() //генераци€ дл€ инпута 
+            static string GenerateSymb() //в helper
             {
                 string s = string.Empty;
                 Random rand = new Random();
