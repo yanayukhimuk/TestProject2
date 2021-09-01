@@ -35,8 +35,14 @@ namespace TestProject2
         {
             Browser_Settings brow = new Browser_Settings();
             IWebDriver webDriver => brow.getDriver;
-            string chrome_url = "https://www.google.com/"; //выбор из файла
-            string brw_url = "https://www.rw.by/";
+            public WebSiteTest()
+            {
+                var urls = System.IO.File.ReadAllLines("file.txt");
+                chrome_url = urls[0];
+                brw_url = urls[1];
+            }
+            string chrome_url;
+            string brw_url;
 
             [SetUp] // добавила предустановку - нашла такой вариант 
             public void StartBrowser()
@@ -59,7 +65,9 @@ namespace TestProject2
                 IWebElement SearchResult = webDriver.FindElement(By.CssSelector("a[href=\"https://www.rw.by/\"]"));
                 SearchResult.Click();
 
-                var CheckSite = webDriver.FindElement(By.Id("tickets_form")); //возможна проверка страницы через JS
+                System.Threading.Thread.Sleep(2000);
+
+                var CheckSite = webDriver.FindElement(By.ClassName("footer-extra")); //возможна проверка страницы через JS
                 Assert.That(CheckSite.Displayed, Is.True);
             }
 
@@ -125,29 +133,18 @@ namespace TestProject2
                 webDriver.FindElement(By.ClassName("ui-state-active")).Click();
                 webDriver.FindElement(By.CssSelector("#fTickets input[type=\"submit\"")).Click();
 
-                webDriver.FindElements(By.CssSelector(".sch-table__train-type .sch-table__route")).Select(el => el.Text).ToList().ForEach(Console.WriteLine);
+                webDriver.FindElements(By.ClassName("train-route")).Zip(webDriver.FindElements(By.ClassName("train-from-time")))
+                    .ToList()
+                    .ForEach(pair => Console.WriteLine(pair.First.Text + " " + pair.Second.Text));
 
-                System.Collections.Generic.List<IWebElement> links = new System.Collections.Generic.List<IWebElement>();
-                foreach (var link in links)
-                {
-                    if (link.Text == "702Б")
-                    {
-                        link.Click();
-                        break;
-                    }
-                }
-                IWebElement TrainDisplayed = webDriver.FindElement(By.CssSelector(".sch-title__title h2"));
-                Assert.That(TrainDisplayed.Displayed, Is.True);
+                webDriver.FindElements(By.ClassName("train-route"))[0].Click();
+                Assert.That(webDriver.FindElement(By.ClassName("sch-title__title")).Displayed, Is.True);
 
-                var DaysOfTravel = webDriver.FindElement(By.CssSelector(".sch-title__descr")); 
-                Assert.That(DaysOfTravel.Displayed, Is.True);
+                Assert.That(webDriver.FindElement(By.CssSelector(".sch-title__descr")).Displayed, Is.True);
 
-                IWebElement SiteLogo = webDriver.FindElement(By.CssSelector(".header-bottom .logo-png"));
-                SiteLogo.Click();
+                webDriver.FindElement(By.CssSelector(".header-bottom .logo-png")).Click();
 
-                var CheckSite2 = webDriver.FindElement(By.Id("tickets_form"));
-                Assert.That(CheckSite2.Displayed, Is.True);
-
+                Assert.That(webDriver.FindElement(By.ClassName("g-footer")).Displayed, Is.True);
 
             }
 
@@ -161,31 +158,6 @@ namespace TestProject2
                 }
                 return s;
             }
-
-            //IWebElement GetRequiredDateElem(DateTime requiredDate) => webDriver.FindElement(By.Id("ui-datepicker-div"))
-            //        .FindElements(By.CssSelector("td"))
-            //        .Where(el =>
-            //        {
-            //            try
-            //            {
-            //                return el.FindElement(By.ClassName("ui-state-default")).Text == requiredDate.Day.ToString();
-            //            }
-            //            catch (NoSuchElementException)
-            //            {
-            //                return false;
-            //            }
-            //        }).FirstOrDefault(el =>
-            //{
-            //    var contextEl = webDriver.FindElement(By.ClassName("ui-datepicker-today"));
-            //    var onclickStr = contextEl.GetAttribute("onclick");
-            //    var commaInd1 = onclickStr.IndexOf(',');
-            //    var commaInd2 = onclickStr.IndexOf(',', commaInd1 + 1);
-            //    var commaInd3 = onclickStr.IndexOf(',', commaInd2 + 1);
-            //    var month = Convert.ToInt32(onclickStr[(commaInd1 + 1)..commaInd2]);
-            //    var year = Convert.ToInt32(onclickStr[(commaInd2 + 1)..commaInd3]);
-            //    return requiredDate.Month == month && requiredDate.Year == year;
-            //});
-
         }
     }
 }
