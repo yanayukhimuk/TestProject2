@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
 using System;
 using System.Linq;
 
@@ -35,6 +36,7 @@ namespace TestProject2
         {
             Browser_Settings brow = new Browser_Settings();
             IWebDriver webDriver => brow.getDriver;
+
             public WebSiteTest()
             {
                 var urls = System.IO.File.ReadAllLines("file.txt");
@@ -51,11 +53,14 @@ namespace TestProject2
             }
 
             [Test]
-            public void Test1() 
+            public void Test1()
             {
                 brow.Goto(chrome_url);
-                System.Threading.Thread.Sleep(2000); //убрать - 2 типа ожидания в Selenium - test 
-                //Page object - только логика
+
+                var wait = new WebDriverWait(webDriver, TimeSpan.FromSeconds(20));
+                wait.Until(driver1 => ((IJavaScriptExecutor)webDriver)
+                .ExecuteScript("return document.readyState")
+                .Equals("complete")); //JS чтобы дождаться загрузки страницы
 
                 IWebElement SearchInput = webDriver.FindElement(By.Name("q"));
 
@@ -65,17 +70,25 @@ namespace TestProject2
                 IWebElement SearchResult = webDriver.FindElement(By.CssSelector("a[href=\"https://www.rw.by/\"]"));
                 SearchResult.Click();
 
-                System.Threading.Thread.Sleep(2000);
+                wait.Until(driver1 => ((IJavaScriptExecutor)webDriver)
+                .ExecuteScript("return document.readyState")
+                .Equals("complete"));
 
                 var CheckSite = webDriver.FindElement(By.ClassName("footer-extra")); //возможна проверка страницы через JS
                 Assert.That(CheckSite.Displayed, Is.True);
             }
 
             [Test]
-            public void Test2() 
+            public void Test2()
             {
                 brow.Goto(brw_url);
-                System.Threading.Thread.Sleep(2000);
+
+                var wait = new WebDriverWait(webDriver, TimeSpan.FromSeconds(20)); 
+
+                wait.Until(driver1 =>
+                ((IJavaScriptExecutor)webDriver)
+                .ExecuteScript("return document.readyState")
+                .Equals("complete"));
 
                 var LanguageSwitcher = webDriver.FindElement(By.LinkText("ENG"));//обработка exception - Assert doesnt throw 
                 LanguageSwitcher.Click();
@@ -92,10 +105,16 @@ namespace TestProject2
             }
 
             [Test]
-            public void Test3()  
+            public void Test3()
             {
                 brow.Goto(brw_url);
-                System.Threading.Thread.Sleep(2000);
+
+                var wait = new WebDriverWait(webDriver, TimeSpan.FromSeconds(20)); 
+                
+                wait.Until(driver1 =>
+                ((IJavaScriptExecutor)webDriver)
+                .ExecuteScript("return document.readyState")
+                .Equals("complete"));
 
                 IWebElement SearchInputTwo = webDriver.FindElement(By.Name("q"));
                 var symbs = GenerateSymb();
@@ -120,7 +139,12 @@ namespace TestProject2
             public void Test4()
             {
                 brow.Goto(brw_url);
-                System.Threading.Thread.Sleep(2000);
+                var wait = new WebDriverWait(webDriver, TimeSpan.FromSeconds(20)); 
+                
+                wait.Until(driver1 =>
+                ((IJavaScriptExecutor)webDriver)
+                .ExecuteScript("return document.readyState")
+                .Equals("complete"));
 
                 IWebElement WhereFrom = webDriver.FindElement(By.Name("from"));
                 IWebElement WhereTo = webDriver.FindElement(By.Name("to"));
