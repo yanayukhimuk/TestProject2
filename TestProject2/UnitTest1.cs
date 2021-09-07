@@ -59,16 +59,12 @@ namespace TestProject2
                 BRWPage brwPage = new BRWPage(webDriver);
                 brow.Goto(chrome_url);
 
-                SiteLoaded();
-                //var wait = new WebDriverWait(webDriver, TimeSpan.FromSeconds(20));
-                //wait.Until(driver1 => ((IJavaScriptExecutor)webDriver)
-                //.ExecuteScript("return document.readyState")
-                //.Equals("complete")); //JS чтобы дождаться загрузки страницы
+                chromePage.SiteLoaded();
 
                 chromePage.SearchSiteBRW();
                 chromePage.goToFoundLnk();
 
-                SiteLoaded();
+                chromePage.SiteLoaded();
 
                 brwPage.HasTheSiteLoaded();
             }
@@ -79,21 +75,15 @@ namespace TestProject2
                 BRWPage brwPage = new BRWPage(webDriver);
                 brow.Goto(brw_url);
 
-                SiteLoaded();
+                brwPage.SiteLoaded();
 
                 brwPage.ChangeLanguageToEng();
-                //var LanguageSwitcher = webDriver.FindElement(By.LinkText("ENG"));//обработка exception - Assert doesnt throw 
-                //LanguageSwitcher.Click();
 
-                //brwPage.Have5NewsItemsBeenFound();
-                var NewsItems = webDriver.FindElements(By.CssSelector(".index-news-list dt"));
-                Assert.GreaterOrEqual(NewsItems.Count, 4);
+                brwPage.Have4NewsItemsBeenFound(); 
 
                 brwPage.HasCopyrightBeenFound();
 
-                //Assert.DoesNotThrow(() => webDriver.FindElement(By.CssSelector(".footer-extra .copyright")));
-
-                Assert.GreaterOrEqual(webDriver.FindElements(By.CssSelector(".menu-items td")).Count, 5);
+                brwPage.Have5MenuButtonsFound();
 
                 brwPage.ChangeLanguageToRus();
             }
@@ -101,89 +91,36 @@ namespace TestProject2
             [Test]
             public void Test3()
             {
+                BRWPage brwPage = new BRWPage(webDriver);
                 brow.Goto(brw_url);
 
-                var wait = new WebDriverWait(webDriver, TimeSpan.FromSeconds(20)); 
+                brwPage.SiteLoaded();
+
+                brwPage.sendKeysToSearch();
+
+                brwPage.sendKeysToSearchTwo();
+
+                brwPage.showFoundLinks();
                 
-                wait.Until(driver1 =>
-                ((IJavaScriptExecutor)webDriver)
-                .ExecuteScript("return document.readyState")
-                .Equals("complete"));
-
-                IWebElement SearchInputTwo = webDriver.FindElement(By.Name("q"));
-                var symbs = GenerateSymb();
-                SearchInputTwo.SendKeys(symbs);
-                SearchInputTwo.Submit();
-
-                Assert.AreEqual("https://www.rw.by/search/?s=Y&q=" + symbs, webDriver.Url);
-
-                Assert.DoesNotThrow(() => webDriver.FindElement(By.CssSelector(".search-result .notetext")));
-
-                IWebElement SearchInputThree = webDriver.FindElement(By.Name("q"));
-                SearchInputThree.Clear();
-                SearchInputThree.SendKeys("Санкт-Петербург");
-                SearchInputThree.Submit();
-
-                Assert.GreaterOrEqual(webDriver.FindElements(By.CssSelector(".search-result .name")).Count, 15);
-                webDriver.FindElements(By.CssSelector(".search-result .name")).Select(el => el.GetAttribute("href")).ToList().ForEach(Console.WriteLine);
-
             }
 
             [Test]
             public void Test4()
             {
+                BRWPage brwPage = new BRWPage(webDriver);
                 brow.Goto(brw_url);
-                var wait = new WebDriverWait(webDriver, TimeSpan.FromSeconds(20)); 
-                
-                wait.Until(driver1 =>
-                ((IJavaScriptExecutor)webDriver)
-                .ExecuteScript("return document.readyState")
-                .Equals("complete"));
 
-                IWebElement WhereFrom = webDriver.FindElement(By.Name("from"));
-                IWebElement WhereTo = webDriver.FindElement(By.Name("to"));
+                brwPage.SiteLoaded();
 
-                WhereFrom.SendKeys("Брест");
-                WhereTo.SendKeys("Минск");
+                brwPage.setDestination();
 
-                webDriver.FindElement(By.Id("yDate"))
-                    .SendKeys(DateTime.Now.AddDays(5).ToShortDateString());
-                webDriver.FindElement(By.ClassName("ui-state-active")).Click();
-                webDriver.FindElement(By.CssSelector("#fTickets input[type=\"submit\"")).Click();
+                brwPage.showTrains();
 
-                webDriver.FindElements(By.ClassName("train-route")).Zip(webDriver.FindElements(By.ClassName("train-from-time")))
-                    .ToList()
-                    .ForEach(pair => Console.WriteLine(pair.First.Text + " " + pair.Second.Text));
+                brwPage.chooseFirstTrain();
 
-                webDriver.FindElements(By.ClassName("train-route"))[0].Click();
-                Assert.That(webDriver.FindElement(By.ClassName("sch-title__title")).Displayed, Is.True);
-
-                Assert.That(webDriver.FindElement(By.CssSelector(".sch-title__descr")).Displayed, Is.True);
-
-                webDriver.FindElement(By.CssSelector(".header-bottom .logo-png")).Click();
-
-                Assert.That(webDriver.FindElement(By.ClassName("g-footer")).Displayed, Is.True);
-
+                brwPage.goBackToMainPage();
             }
 
-            static string GenerateSymb() //в helper
-            {
-                string s = string.Empty;
-                Random rand = new Random();
-                for (int i = 0; i < 20; i++)
-                {
-                    s += (char)rand.Next('a', 'z' + 1);
-                }
-                return s;
-            }
-
-            public void SiteLoaded()
-            {
-                var wait = new WebDriverWait(webDriver, TimeSpan.FromSeconds(20));
-                wait.Until(driver1 => ((IJavaScriptExecutor)webDriver)
-                .ExecuteScript("return document.readyState")
-                .Equals("complete"));
-            }
         }
     }
 }

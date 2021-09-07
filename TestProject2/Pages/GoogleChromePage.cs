@@ -8,6 +8,7 @@ using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.IE;
 using System.Linq;
 using System.Threading.Tasks;
+using OpenQA.Selenium.Support.UI;
 
 namespace TestProject2.Pages
 {
@@ -15,12 +16,12 @@ namespace TestProject2.Pages
     //Actions taken on google site 
     public class GoogleChromePage
     {
-        public GoogleChromePage(IWebDriver webDriver)
+        public GoogleChromePage(IWebDriver WebDriver)
         {
-            Driver = webDriver;
+            this.WebDriver = WebDriver;
         }
-        public IWebDriver Driver { get; }
-        public IWebElement searchInput => Driver.FindElement(By.Name("q"));
+        private IWebDriver WebDriver { get; }
+        public IWebElement searchInput => WebDriver.FindElement(By.Name("q"));
         
         public void SearchSiteBRW()
         {
@@ -28,9 +29,16 @@ namespace TestProject2.Pages
             searchInput.SendKeys(Keys.Enter);
         }
 
-        public IWebElement searchLinkBRW => Driver.FindElement(By.CssSelector("a[href=\"https://www.rw.by/\"]"));
+        public IWebElement searchLinkBRW => WebDriver.FindElement(By.CssSelector("a[href=\"https://www.rw.by/\"]"));
         public void goToFoundLnk() => searchLinkBRW.Click();
 
+        public void SiteLoaded()
+        {
+            var wait = new WebDriverWait(WebDriver, TimeSpan.FromSeconds(20));
+            wait.Until(driver1 => ((IJavaScriptExecutor)WebDriver)
+            .ExecuteScript("return document.readyState")
+            .Equals("complete"));
+        }
 
     }
 }
