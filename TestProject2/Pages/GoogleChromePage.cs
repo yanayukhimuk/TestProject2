@@ -20,13 +20,17 @@ namespace TestProject2.Pages
             Driver = webDriver;
         }
         public IWebDriver Driver { get; }
-        public IWebElement SearchInput => Driver.FindElement(By.Name("q"));
+        public IWebElement searchInput => Driver.FindElement(By.Name("q"));
         
         public void SearchSiteBRW()
         {
-            SearchInput.SendKeys("белорусская железная дорога");
-            SearchInput.SendKeys(Keys.Enter);
+            searchInput.SendKeys("белорусская железная дорога");
+            searchInput.SendKeys(Keys.Enter);
         }
-        
+
+        public IWebElement searchLinkBRW => Driver.FindElement(By.CssSelector("a[href=\"https://www.rw.by/\"]"));
+        public void goToFoundLnk() => searchLinkBRW.Click();
+
+
     }
 }

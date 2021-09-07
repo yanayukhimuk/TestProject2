@@ -4,7 +4,7 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Linq;
-
+using TestProject2.Pages;
 
 namespace TestProject2
 {
@@ -55,53 +55,47 @@ namespace TestProject2
             [Test]
             public void Test1()
             {
+                GoogleChromePage chromePage = new GoogleChromePage(webDriver);
+                BRWPage brwPage = new BRWPage(webDriver);
                 brow.Goto(chrome_url);
 
-                var wait = new WebDriverWait(webDriver, TimeSpan.FromSeconds(20));
-                wait.Until(driver1 => ((IJavaScriptExecutor)webDriver)
-                .ExecuteScript("return document.readyState")
-                .Equals("complete")); //JS чтобы дождаться загрузки страницы
+                SiteLoaded();
+                //var wait = new WebDriverWait(webDriver, TimeSpan.FromSeconds(20));
+                //wait.Until(driver1 => ((IJavaScriptExecutor)webDriver)
+                //.ExecuteScript("return document.readyState")
+                //.Equals("complete")); //JS чтобы дождаться загрузки страницы
 
-                IWebElement SearchInput = webDriver.FindElement(By.Name("q"));
+                chromePage.SearchSiteBRW();
+                chromePage.goToFoundLnk();
 
-                SearchInput.SendKeys("белорусская железная дорога");
-                SearchInput.Submit();
+                SiteLoaded();
 
-                IWebElement SearchResult = webDriver.FindElement(By.CssSelector("a[href=\"https://www.rw.by/\"]"));
-                SearchResult.Click();
-
-                wait.Until(driver1 => ((IJavaScriptExecutor)webDriver)
-                .ExecuteScript("return document.readyState")
-                .Equals("complete"));
-
-                var CheckSite = webDriver.FindElement(By.ClassName("footer-extra")); //возможна проверка страницы через JS
-                Assert.That(CheckSite.Displayed, Is.True);
+                brwPage.HasTheSiteLoaded();
             }
 
             [Test]
             public void Test2()
             {
+                BRWPage brwPage = new BRWPage(webDriver);
                 brow.Goto(brw_url);
 
-                var wait = new WebDriverWait(webDriver, TimeSpan.FromSeconds(20)); 
+                SiteLoaded();
 
-                wait.Until(driver1 =>
-                ((IJavaScriptExecutor)webDriver)
-                .ExecuteScript("return document.readyState")
-                .Equals("complete"));
+                brwPage.ChangeLanguageToEng();
+                //var LanguageSwitcher = webDriver.FindElement(By.LinkText("ENG"));//обработка exception - Assert doesnt throw 
+                //LanguageSwitcher.Click();
 
-                var LanguageSwitcher = webDriver.FindElement(By.LinkText("ENG"));//обработка exception - Assert doesnt throw 
-                LanguageSwitcher.Click();
-
+                //brwPage.Have5NewsItemsBeenFound();
                 var NewsItems = webDriver.FindElements(By.CssSelector(".index-news-list dt"));
                 Assert.GreaterOrEqual(NewsItems.Count, 4);
 
-                Assert.DoesNotThrow(() => webDriver.FindElement(By.CssSelector(".footer-extra .copyright")));
+                brwPage.HasCopyrightBeenFound();
+
+                //Assert.DoesNotThrow(() => webDriver.FindElement(By.CssSelector(".footer-extra .copyright")));
 
                 Assert.GreaterOrEqual(webDriver.FindElements(By.CssSelector(".menu-items td")).Count, 5);
 
-                LanguageSwitcher = webDriver.FindElement(By.LinkText("РУС"));
-                LanguageSwitcher.Click();
+                brwPage.ChangeLanguageToRus();
             }
 
             [Test]
@@ -181,6 +175,14 @@ namespace TestProject2
                     s += (char)rand.Next('a', 'z' + 1);
                 }
                 return s;
+            }
+
+            public void SiteLoaded()
+            {
+                var wait = new WebDriverWait(webDriver, TimeSpan.FromSeconds(20));
+                wait.Until(driver1 => ((IJavaScriptExecutor)webDriver)
+                .ExecuteScript("return document.readyState")
+                .Equals("complete"));
             }
         }
     }
