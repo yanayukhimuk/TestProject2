@@ -1,13 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using NUnit.Framework;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Firefox;
-using OpenQA.Selenium.IE;
-using System.Linq;
-using System.Threading.Tasks;
 using OpenQA.Selenium.Support.UI;
 
 namespace TestProject2.Pages

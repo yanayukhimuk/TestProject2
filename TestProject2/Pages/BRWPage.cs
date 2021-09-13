@@ -2,7 +2,7 @@
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using System;
-using System.Linq;
+using System.Linq; //for Zip, Select = collections  
 
 namespace TestProject2.Pages
 {
