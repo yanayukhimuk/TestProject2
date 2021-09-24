@@ -1,9 +1,7 @@
 ﻿using NUnit.Framework;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Support.UI;
 using System;
-using System.Linq; //for Zip, Select = collections  
-
+using System.Linq;
 namespace TestProject2.Pages
 {
     public class BRWPage
@@ -14,42 +12,60 @@ namespace TestProject2.Pages
         }
         private IWebDriver WebDriver { get; }
 
-        public IWebElement CheckSite => WebDriver.FindElement(By.ClassName("footer-extra"));
+        const string url = "https://www.rw.by/";
+        public void Goto()
+        {
+            WebDriver.Navigate().GoToUrl(url);
+        }
 
-        public bool HasTheSiteLoaded() => CheckSite.Displayed;
+        public void HasTheSiteLoaded()
+        {
+            var CheckSiteByFooter = WebDriver.FindElement(By.ClassName("footer-extra"));
+            Assert.That(CheckSiteByFooter.Displayed);
+        }
 
-        public IWebElement LanguageSwitcherENG => WebDriver.FindElement(By.LinkText("ENG"));
-        public void ChangeLanguageToEng() => LanguageSwitcherENG.Click();
+        public void ChangeLanguage(string RequiredLanguage)
+        {
+            var EnglishLanguage = WebDriver.FindElement(By.LinkText("ENG"));
+            var RussianLanguage = WebDriver.FindElement(By.LinkText("RUS"));
 
-        public void Have4NewsItemsBeenFound()
+            if (RequiredLanguage == "ENG")
+            {
+                EnglishLanguage.Click();
+            }
+
+            else if (RequiredLanguage == "RUS")
+            {
+                RussianLanguage.Click();
+            }
+        }
+        public void HaveAtLeast4NewsItemsBeenFound()
         {
             var NewsItems = WebDriver.FindElements(By.CssSelector(".index-news-list dt"));
             Assert.GreaterOrEqual(NewsItems.Count, 4);
         }
 
-        public void Have5MenuButtonsFound()
+        public void HaveAtLeast5MenuButtonsBeenFound()
         {
-            Assert.GreaterOrEqual(WebDriver.FindElements(By.CssSelector(".menu-items td")).Count, 5);
+            var MenuButtons = WebDriver.FindElements(By.CssSelector(".menu-items td"));
+            Assert.GreaterOrEqual(MenuButtons.Count, 5);
         }
         public IWebElement CopyRight => WebDriver.FindElement(By.CssSelector(".footer-extra .copyright"));
 
         public bool HasCopyrightBeenFound() => CopyRight.Displayed;
 
-        IWebElement LanguageSwitcherRUS => WebDriver.FindElement(By.LinkText("РУС"));
-        public void ChangeLanguageToRus() => LanguageSwitcherRUS.Click();
+        IWebElement SearchInput => WebDriver.FindElement(By.Name("q"));
 
-        IWebElement searchInput => WebDriver.FindElement(By.Name("q"));
-
-        string Symbs = GenerateSymb();
-        public void sendKeysToSearch()
+        readonly string Symbs = GenerateSymb();
+        public void SendKeysToFakeSearch()
         {
-            searchInput.SendKeys(Symbs);
-            searchInput.Submit();
+            SearchInput.SendKeys(Symbs);
+            SearchInput.Submit();
             Assert.AreEqual("https://www.rw.by/search/?s=Y&q=" + Symbs, WebDriver.Url);
             Assert.DoesNotThrow(() => WebDriver.FindElement(By.CssSelector(".search-result .notetext")));
         }
 
-        public void showFoundLinks()
+        public void ShowFoundLinks()
         {
             WebDriver.FindElements(By.CssSelector(".search-result .name")).Select(el => el.GetAttribute("href")).ToList().ForEach(Console.WriteLine);
         }
@@ -59,25 +75,25 @@ namespace TestProject2.Pages
         public IWebElement WhereFrom => WebDriver.FindElement(By.Name("from"));
         public IWebElement WhereTo => WebDriver.FindElement(By.Name("to"));
 
-        public IWebElement yDate => WebDriver.FindElement(By.Id("yDate"));
+        public IWebElement HighlightedDate => WebDriver.FindElement(By.Id("yDate"));
 
-        public void setDestination()
+        public void SetDepartureAndDestination()
         {
             WhereFrom.SendKeys("Брест");
             WhereTo.SendKeys("Минск");
-            yDate.SendKeys(DateTime.Now.AddDays(5).ToShortDateString());
+            HighlightedDate.SendKeys(DateTime.Now.AddDays(5).ToShortDateString());
             WebDriver.FindElement(By.ClassName("ui-state-active")).Click();
             WebDriver.FindElement(By.CssSelector("#fTickets input[type=\"submit\"")).Click();
         }
-       
-        public void showTrains()
+
+        public void PrintFoundTrainsAndDatesToConsole()
         {
             WebDriver.FindElements(By.ClassName("train-route")).Zip(WebDriver.FindElements(By.ClassName("train-from-time")))
                     .ToList()
                     .ForEach(pair => Console.WriteLine(pair.First.Text + " " + pair.Second.Text));
         }
 
-        public void chooseFirstTrain()
+        public void ChooseFirstTrain()
         {
             WebDriver.FindElements(By.ClassName("train-route"))[0].Click();
             Assert.That(WebDriver.FindElement(By.ClassName("sch-title__title")).Displayed, Is.True);
@@ -85,7 +101,7 @@ namespace TestProject2.Pages
             Assert.That(WebDriver.FindElement(By.CssSelector(".sch-title__descr")).Displayed, Is.True);
         }
 
-        public void goBackToMainPage()
+        public void GoBackToMainPage()
         {
             WebDriver.FindElement(By.CssSelector(".header-bottom .logo-png")).Click();
 
@@ -102,20 +118,12 @@ namespace TestProject2.Pages
             return s;
         }
 
-        public void sendKeysToSearchTwo()
+        public void FindTrainsToSaintPetersburg()
         {
-            searchInput.Clear();
-            searchInput.SendKeys("Санкт-Петербург");
-            searchInput.Submit();
+            SearchInput.Clear();
+            SearchInput.SendKeys("Санкт-Петербург");
+            SearchInput.Submit();
             Assert.GreaterOrEqual(WebDriver.FindElements(By.CssSelector(".search-result .name")).Count, 15);
-        }
-
-        public void SiteLoaded()
-        {
-            var wait = new WebDriverWait(WebDriver, TimeSpan.FromSeconds(20));
-            wait.Until(driver1 => ((IJavaScriptExecutor)WebDriver)
-            .ExecuteScript("return document.readyState")
-            .Equals("complete"));
         }
     }
 }

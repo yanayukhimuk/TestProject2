@@ -54,50 +54,53 @@ namespace TestProject2
             {
                 GoogleChromePage chromePage = new GoogleChromePage(webDriver);
                 BRWPage brwPage = new BRWPage(webDriver);
+                Helper helper = new Helper(webDriver);
                 brow.Goto(chrome_url);
 
-                chromePage.SiteLoaded();
+                helper.SiteLoaded();
 
                 chromePage.SearchSiteBRW();
                 chromePage.goToFoundLnk();
 
-                chromePage.SiteLoaded();
+                helper.SiteLoaded();
 
-                brwPage.HasTheSiteLoaded();
+                helper.CheckThatSiteLoaded();
             }
 
             [Test]
             public void Test2()
             {
                 BRWPage brwPage = new BRWPage(webDriver);
+                Helper helper = new Helper(webDriver);
                 brow.Goto(brw_url);
 
-                brwPage.SiteLoaded();
+                helper.CheckThatSiteLoaded();
 
-                brwPage.ChangeLanguageToEng();
+                brwPage.ChangeLanguage("ENG");
 
-                brwPage.Have4NewsItemsBeenFound(); 
+                brwPage.HaveAtLeast4NewsItemsBeenFound(); 
 
                 brwPage.HasCopyrightBeenFound();
 
-                brwPage.Have5MenuButtonsFound();
+                brwPage.HaveAtLeast5MenuButtonsBeenFound();
 
-                brwPage.ChangeLanguageToRus();
+                brwPage.ChangeLanguage("RUS");
             }
 
             [Test]
             public void Test3()
             {
                 BRWPage brwPage = new BRWPage(webDriver);
+                Helper helper = new Helper(webDriver);
                 brow.Goto(brw_url);
 
-                brwPage.SiteLoaded();
+                helper.CheckThatSiteLoaded();
 
-                brwPage.sendKeysToSearch();
+                brwPage.SendKeysToFakeSearch();
 
-                brwPage.sendKeysToSearchTwo();
+                brwPage.FindTrainsToSaintPetersburg();
 
-                brwPage.showFoundLinks();
+                brwPage.ShowFoundLinks();
                 
             }
 
@@ -105,19 +108,26 @@ namespace TestProject2
             public void Test4()
             {
                 BRWPage brwPage = new BRWPage(webDriver);
+                Helper helper = new Helper(webDriver);
                 brow.Goto(brw_url);
 
-                brwPage.SiteLoaded();
+                helper.CheckThatSiteLoaded();
 
-                brwPage.setDestination();
+                brwPage.SetDepartureAndDestination();
 
-                brwPage.showTrains();
+                brwPage.PrintFoundTrainsAndDatesToConsole();
 
-                brwPage.chooseFirstTrain();
+                brwPage.ChooseFirstTrain();
 
-                brwPage.goBackToMainPage();
+                brwPage.GoBackToMainPage();
             }
 
+            [TearDown]
+
+            public void CloseBrowser()
+            {
+                brow.Close();
+            }
         }
     }
 }

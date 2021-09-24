@@ -21,16 +21,8 @@ namespace TestProject2.Pages
             searchInput.SendKeys(Keys.Enter);
         }
 
-        public IWebElement searchLinkBRW => WebDriver.FindElement(By.CssSelector("a[href=\"https://www.rw.by/\"]"));
-        public void goToFoundLnk() => searchLinkBRW.Click();
-
-        public void SiteLoaded()
-        {
-            var wait = new WebDriverWait(WebDriver, TimeSpan.FromSeconds(20));
-            wait.Until(driver1 => ((IJavaScriptExecutor)WebDriver)
-            .ExecuteScript("return document.readyState")
-            .Equals("complete"));
-        }
+        public IWebElement SearchLinkToBRWSite => WebDriver.FindElement(By.CssSelector("a[href=\"https://www.rw.by/\"]"));
+        public void goToFoundLnk() => SearchLinkToBRWSite.Click();
 
     }
 }
