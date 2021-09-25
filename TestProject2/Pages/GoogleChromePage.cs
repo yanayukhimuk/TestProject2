@@ -13,16 +13,16 @@ namespace TestProject2.Pages
             this.WebDriver = WebDriver;
         }
         private IWebDriver WebDriver { get; }
-        public IWebElement searchInput => WebDriver.FindElement(By.Name("q"));
+        public IWebElement SearchInput => 
+            WebDriver.FindElement(By.Name("q")); // SearchInput можно в Helper?
         
         public void SearchSiteBRW()
         {
-            searchInput.SendKeys("белорусская железная дорога");
-            searchInput.SendKeys(Keys.Enter);
+            SearchInput.SendKeys("белорусская железная дорога");
+            SearchInput.SendKeys(Keys.Enter);
         }
-
-        public IWebElement SearchLinkToBRWSite => WebDriver.FindElement(By.CssSelector("a[href=\"https://www.rw.by/\"]"));
-        public void goToFoundLnk() => SearchLinkToBRWSite.Click();
+        public void goToFoundLnk() => 
+            WebDriver.FindElement(By.CssSelector("a[href=\"https://www.rw.by/\"]")).Click();
 
     }
 }

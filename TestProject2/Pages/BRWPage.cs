@@ -6,6 +6,7 @@ namespace TestProject2.Pages
 {
     public class BRWPage
     {
+
         public BRWPage(IWebDriver WebDriver)
         {
             this.WebDriver = WebDriver;
@@ -13,75 +14,48 @@ namespace TestProject2.Pages
         private IWebDriver WebDriver { get; }
 
         const string url = "https://www.rw.by/";
-        public void Goto()
-        {
-            WebDriver.Navigate().GoToUrl(url);
-        }
-
-        public void HasTheSiteLoaded()
-        {
-            var CheckSiteByFooter = WebDriver.FindElement(By.ClassName("footer-extra"));
-            Assert.That(CheckSiteByFooter.Displayed);
-        }
+        public void Goto() => WebDriver.Navigate().GoToUrl(url);
+        public void HasTheSiteLoaded() => 
+            Assert.That(WebDriver.FindElement(By.ClassName("footer-extra")).Displayed);
 
         public void ChangeLanguage(string RequiredLanguage)
         {
-            var EnglishLanguage = WebDriver.FindElement(By.LinkText("ENG"));
-            var RussianLanguage = WebDriver.FindElement(By.LinkText("RUS"));
-
             if (RequiredLanguage == "ENG")
             {
-                EnglishLanguage.Click();
+                WebDriver.FindElement(By.LinkText("ENG")).Click();
             }
 
             else if (RequiredLanguage == "RUS")
             {
-                RussianLanguage.Click();
+                WebDriver.FindElement(By.LinkText("RUS")).Click();
             }
         }
-        public void HaveAtLeast4NewsItemsBeenFound()
-        {
-            var NewsItems = WebDriver.FindElements(By.CssSelector(".index-news-list dt"));
-            Assert.GreaterOrEqual(NewsItems.Count, 4);
-        }
+        public void HaveAtLeast4NewsItemsBeenFound() => 
+            Assert.GreaterOrEqual(WebDriver.FindElements(By.CssSelector(".index-news-list dt")).Count, 4);
 
-        public void HaveAtLeast5MenuButtonsBeenFound()
-        {
-            var MenuButtons = WebDriver.FindElements(By.CssSelector(".menu-items td"));
-            Assert.GreaterOrEqual(MenuButtons.Count, 5);
-        }
-        public IWebElement CopyRight => WebDriver.FindElement(By.CssSelector(".footer-extra .copyright"));
-
-        public bool HasCopyrightBeenFound() => CopyRight.Displayed;
+        public void HaveAtLeast5MenuButtonsBeenFound() =>
+            Assert.GreaterOrEqual(WebDriver.FindElements(By.CssSelector(".menu-items td")).Count, 5);
+       public void HasCopyrightBeenFound() => 
+            Assert.That(WebDriver.FindElement(By.CssSelector(".footer-extra .copyright")).Displayed);
 
         IWebElement SearchInput => WebDriver.FindElement(By.Name("q"));
 
-        readonly string Symbs = GenerateSymb();
+        readonly string GeneratedSymbols = GenerateSymb();
         public void SendKeysToFakeSearch()
         {
-            SearchInput.SendKeys(Symbs);
+            SearchInput.SendKeys(GeneratedSymbols);
             SearchInput.Submit();
-            Assert.AreEqual("https://www.rw.by/search/?s=Y&q=" + Symbs, WebDriver.Url);
+            Assert.AreEqual("https://www.rw.by/search/?s=Y&q=" + GeneratedSymbols, WebDriver.Url);
             Assert.DoesNotThrow(() => WebDriver.FindElement(By.CssSelector(".search-result .notetext")));
         }
 
-        public void ShowFoundLinks()
-        {
+        public void ShowFoundLinks() => 
             WebDriver.FindElements(By.CssSelector(".search-result .name")).Select(el => el.GetAttribute("href")).ToList().ForEach(Console.WriteLine);
-        }
-
-
-
-        public IWebElement WhereFrom => WebDriver.FindElement(By.Name("from"));
-        public IWebElement WhereTo => WebDriver.FindElement(By.Name("to"));
-
-        public IWebElement HighlightedDate => WebDriver.FindElement(By.Id("yDate"));
-
         public void SetDepartureAndDestination()
         {
-            WhereFrom.SendKeys("Брест");
-            WhereTo.SendKeys("Минск");
-            HighlightedDate.SendKeys(DateTime.Now.AddDays(5).ToShortDateString());
+            WebDriver.FindElement(By.Name("from")).SendKeys("Брест");
+            WebDriver.FindElement(By.Name("to")).SendKeys("Минск");
+            WebDriver.FindElement(By.Id("yDate")).SendKeys(DateTime.Now.AddDays(5).ToShortDateString());
             WebDriver.FindElement(By.ClassName("ui-state-active")).Click();
             WebDriver.FindElement(By.CssSelector("#fTickets input[type=\"submit\"")).Click();
         }
@@ -96,16 +70,16 @@ namespace TestProject2.Pages
         public void ChooseFirstTrain()
         {
             WebDriver.FindElements(By.ClassName("train-route"))[0].Click();
-            Assert.That(WebDriver.FindElement(By.ClassName("sch-title__title")).Displayed, Is.True);
+            Assert.That(WebDriver.FindElement(By.ClassName("sch-title__title")).Displayed);
 
-            Assert.That(WebDriver.FindElement(By.CssSelector(".sch-title__descr")).Displayed, Is.True);
+            Assert.That(WebDriver.FindElement(By.CssSelector(".sch-title__descr")).Displayed);
         }
 
         public void GoBackToMainPage()
         {
             WebDriver.FindElement(By.CssSelector(".header-bottom .logo-png")).Click();
 
-            Assert.That(WebDriver.FindElement(By.ClassName("g-footer")).Displayed, Is.True);
+            Assert.That(WebDriver.FindElement(By.ClassName("g-footer")).Displayed);
         }
         static string GenerateSymb() //в helper
         {
